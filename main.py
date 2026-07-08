@@ -78,7 +78,11 @@ class YSLBot(commands.Bot):
         # Verificación global de cárcel — bloquea todos los comandos para usuarios encarcelados
         async def jail_check(ctx: commands.Context) -> bool:
             from utils.economy import is_jailed, JailCheckError
-            release = is_jailed(str(ctx.author.id))
+            try:
+                release = is_jailed(str(ctx.author.id))
+            except Exception:
+                # Si la base de datos no está disponible, dejar pasar el comando
+                return True
             if release:
                 await ctx.send(
                     f"🔒 Estás en la cárcel y no puedes usar comandos hasta <t:{release}:t> (<t:{release}:R>).",
