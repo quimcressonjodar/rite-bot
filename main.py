@@ -73,8 +73,12 @@ class YSLBot(commands.Bot):
             logger.info(f"Cargado {cog}")
         logger.info("Sincronizando árbol de comandos...")
         guild = discord.Object(id=GUILD_ID)
+        # Registrar todos los comandos en el guild (sync instantáneo)
         self.tree.copy_global_to(guild=guild)
         await self.tree.sync(guild=guild)
+        # Limpiar comandos globales para evitar duplicados
+        self.tree.clear_commands(guild=None)
+        await self.tree.sync()
         logger.info("Comandos slash sincronizados")
 
         # Verificación global de cárcel — bloquea todos los comandos para usuarios encarcelados
