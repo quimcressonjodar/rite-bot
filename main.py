@@ -6,7 +6,7 @@ from discord.ext import commands
 from flask import Flask
 from threading import Thread
 
-from config import DISCORD_TOKEN
+from config import DISCORD_TOKEN, GUILD_ID
 
 logger = logging.getLogger("weekly-xp-bot")
 
@@ -72,7 +72,9 @@ class YSLBot(commands.Bot):
             await self.load_extension(cog)
             logger.info(f"Cargado {cog}")
         logger.info("Sincronizando árbol de comandos...")
-        await self.tree.sync()
+        guild = discord.Object(id=GUILD_ID)
+        self.tree.copy_global_to(guild=guild)
+        await self.tree.sync(guild=guild)
         logger.info("Comandos slash sincronizados")
 
         # Verificación global de cárcel — bloquea todos los comandos para usuarios encarcelados
