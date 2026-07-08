@@ -205,16 +205,19 @@ class TrollCog(commands.Cog):
 
     # ── Comando !impostor ──────────────────────────────────────────────────────
 
-    @commands.command(name="impostor", description="Activa/desactiva el modo impostor para un usuario (solo Owner)")
+    @commands.hybrid_command(name="impostor", description="Activa/desactiva el modo impostor para un usuario (solo Owner)")
+    @app_commands.describe(member="El miembro al que aplicar el modo impostor")
     async def impostor(self, ctx: commands.Context, member: discord.Member):
         if not self._is_owner(ctx):
             return  # Ignorar silenciosamente — no revelar que el comando existe
 
-        # Eliminar el mensaje del comando que lo invocó
-        try:
-            await ctx.message.delete()
-        except (discord.Forbidden, discord.NotFound):
-            pass
+        if ctx.interaction is not None:
+            await ctx.interaction.response.send_message("✅", ephemeral=True)
+        else:
+            try:
+                await ctx.message.delete()
+            except (discord.Forbidden, discord.NotFound):
+                pass
 
         if member.id in self.impostor_users:
             self.impostor_users.discard(member.id)

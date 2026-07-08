@@ -208,9 +208,8 @@ class AdminCog(commands.Cog):
             save_warns(warns_data)
         await ctx.send(f"✅ Se borraron todas las advertencias de **{member.name}**.")
 
-    @commands.hybrid_command(name="say", description="Hace que el bot diga algo (solo Admin)")
+    @commands.hybrid_command(name="say", description="Hace que el bot diga algo (solo Owner)")
     @app_commands.describe(message="El mensaje que quieres que repita el bot")
-    @app_commands.default_permissions(administrator=True)
     async def say(self, ctx: commands.Context, *, message: str):
         if not is_admin(ctx):
             return await ctx.send("Comando solo para admins.", ephemeral=True)
@@ -224,13 +223,12 @@ class AdminCog(commands.Cog):
             await ctx.send("¡Mensaje enviado!", ephemeral=True)
             await ctx.channel.send(message)
 
-    @commands.hybrid_command(name="sayembed", description="Envía un mensaje embed personalizado (solo Admin)")
+    @commands.hybrid_command(name="sayembed", description="Envía un mensaje embed personalizado (solo Owner)")
     @app_commands.describe(
         title="Título del embed",
         description="El texto principal del embed",
         color="Código de color hexadecimal (ej. 2b2d31 o ff0000)",
     )
-    @app_commands.default_permissions(administrator=True)
     async def sayembed(self, ctx: commands.Context, title: str, description: str, color: str = "2b2d31"):
         if not is_admin(ctx):
             return await ctx.send("Comando solo para admins.", ephemeral=True)
