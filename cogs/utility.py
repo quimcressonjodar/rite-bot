@@ -135,10 +135,10 @@ FINAL_EMBED = _e(
     ),
     0xF1C40F,
     [
-        ("💸 Más ingresos", "`!weekly` (una vez/semana) • `!claim` (cada hora, si tienes roles)"),
+        ("💸 Más ingresos", "`!weekly` (una vez/semana)"),
         ("🎰 Casino", "`!blackjack <apuesta>` • `!roulette <apuesta> <elección>` • `!dice <apuesta>`"),
         ("🚨 Crimen", "`!crime` • `!rob @usuario` — arriesgado pero paga más. Estar BUSCADO = otros pueden `!catch` buscarte."),
-        ("🐾 Mascotas", "`!shop` → `!buy <mascota>` → `!feed` → `!battle @usuario` → `!adventures <mascota>`"),
+        ("🐾 Mascotas", "`!shop` → `!buy <mascota o comida>` → `!feed` → `!battle @usuario` → `!adventures <mascota>`"),
         ("🏦 Préstamos", "`!loan <cantidad>` → paga con `!repay <cantidad>` — ¡los intereses crecen con el tiempo!"),
         ("🔔 Alertas de precio", "`!alert <SÍMBOLO> <precio>` — recibe un DM cuando una acción alcance tu objetivo."),
         ("⭐ Prestigio", "Tu rango = tu patrimonio neto total. Mayor prestigio = menores comisiones en acciones."),
@@ -155,8 +155,7 @@ REFERENCE_EMBED = _e(
         (
             "💰 Ingresos Gratuitos",
             "`!daily` — ~1,000 🪙 cada 24 h\n"
-            "`!weekly` — ~25,000 🪙 una vez por semana\n"
-            "`!claim` — bono por hora si tienes roles de ingresos de la tienda",
+            "`!weekly` — ~25,000 🪙 una vez por semana",
         ),
         (
             "🏦 Saldo y Banca",
@@ -189,7 +188,7 @@ REFERENCE_EMBED = _e(
         ),
         (
             "🐾 Mascotas",
-            "`!shop` — explorar mascotas, comida y roles en venta\n"
+            "`!shop` — explorar mascotas y comida en venta\n"
             "`!buy <mascota>` — comprar una mascota (monedas de cartera)\n"
             "`!pets` — ver todas tus mascotas: HP, daño, hambre, estado\n"
             "`!feed <mascota> <comida>` — restaurar hambre (las mascotas hambrientas pierden estadísticas)\n"

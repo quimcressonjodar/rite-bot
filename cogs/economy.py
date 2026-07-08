@@ -7,7 +7,6 @@ from discord import app_commands
 from discord.ext import commands
 
 import state
-from config import ROLE_SHOP
 from database import eco_col
 from utils.economy import (
     get_user_data,
@@ -169,62 +168,6 @@ class EconomyCog(commands.Cog):
         if amount < base_amount:
             msg += f"\n📉 🪙 {base_amount - amount:,} monedas usadas para pagar la deuda."
         await ctx.send(msg)
-
-    @commands.hybrid_command(name="claim", description="Reclama recompensas de tus roles")
-    async def claim(self, ctx: commands.Context):
-        await ctx.defer()
-        user_id = str(ctx.author.id)
-        user_data = get_user_data(user_id)
-        now = datetime.now(timezone.utc)
-        last_claim = user_data.get("last_claim")
-
-        if last_claim:
-            if isinstance(last_claim, str):
-                last_claim = datetime.fromisoformat(last_claim)
-            elapsed = (now - last_claim).total_seconds()
-            if elapsed < 3600:
-                remaining = int(3600 - elapsed)
-                next_claim_ts = int((now + timedelta(seconds=remaining)).timestamp())
-                return await ctx.send(
-                    f"❌ Ya reclamaste tus recompensas. Vuelve <t:{next_claim_ts}:R>.",
-                    ephemeral=True,
-                )
-
-        total = 0
-        breakdown = []
-        for key, data in ROLE_SHOP.items():
-            role_id = data.get("role_id")
-            if not role_id:
-                continue
-            role = ctx.guild.get_role(int(role_id))
-            if role and role in ctx.author.roles:
-                reward = data["claim"]
-                total += reward
-                breakdown.append(f"✨ **{role.name}** → 🪙 {reward:,}")
-
-        if total == 0:
-            return await ctx.send("❌ No tienes ningún rol de recompensa.")
-
-        actual_total = apply_amortization(user_id, total)
-        eco_col.update_one(
-            {"_id": user_id},
-            {"$inc": {"wallet": actual_total}, "$set": {"last_claim": now.isoformat()}},
-            upsert=True,
-        )
-        next_claim_ts = int(now.timestamp() + 3600)
-        
-        desc = "\n".join(breakdown)
-        if actual_total < total:
-            desc += f"\n\n📉 🪙 {total - actual_total:,} monedas usadas para pagar la deuda."
-        desc += f"\n\nVuelve <t:{next_claim_ts}:R> para más recompensas."
-        
-        embed = discord.Embed(
-            title="💰 Recompensas Reclamadas", 
-            description=desc, 
-            color=0x00FF99
-        )
-        embed.add_field(name="Total Recibido", value=f"🪙 {actual_total:,}", inline=False)
-        await ctx.send(embed=embed)
 
     @commands.hybrid_command(name="pay", description="Envía monedas a otro miembro")
     @app_commands.describe(member="El miembro al que enviar monedas", amount="Cantidad ('all', 'half' o número)")

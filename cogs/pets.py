@@ -7,7 +7,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands, tasks
 
-from config import PET_SHOP, ROLE_SHOP, FOOD_ITEMS
+from config import PET_SHOP, FOOD_ITEMS
 from database import pets_col, eco_col
 from utils.economy import get_wallet, update_wallet
 from utils.pets import get_current_hunger, get_pet_state, is_pet_dead
@@ -76,7 +76,7 @@ class PetsCog(commands.Cog):
         user_id = str(author.id)
 
         if action.lower() == "view":
-            view = ShopView(target, PET_SHOP, ROLE_SHOP)
+            view = ShopView(target, PET_SHOP)
             embed = view._build_embed(guild)
             if isinstance(target, discord.Interaction):
                 await target.response.send_message(embed=embed, view=view)
@@ -155,40 +155,12 @@ class PetsCog(commands.Cog):
                 )
                 return await self._send_response(target, embed=embed)
 
-            if item_key in ROLE_SHOP:
-                role_data = ROLE_SHOP[item_key]
-                price = int(role_data["price"] * (1 - discount))
-                if balance < price:
-                    return await self._send_response(target, content=f"❌ Necesitas 🪙 {price:,}")
-                role = guild.get_role(int(role_data["role_id"]))
-                if not role:
-                    return await self._send_response(target, content=f"❌ ID de rol {role_data['role_id']} no encontrado.")
-                if role in author.roles:
-                    return await self._send_response(target, content="❌ Ya tienes este rol.")
-                update_wallet(user_id, -price)
-                await author.add_roles(role)
-                
-                # Seguimiento de misiones
-                from utils.bounties import track_bounty_progress
-                await track_bounty_progress(self.bot, user_id, "BIG_SPENDER", price)
-                
-                embed = discord.Embed(
-                    title="💎 Rol Comprado",
-                    description=(
-                        f"Compraste **{role.name}**\n\n"
-                        f"Costo: 🪙 {price:,}\n"
-                        f"Recompensa: 🪙 {role_data['claim']:,}/hora"
-                    ),
-                    color=0xF1C40F,
-                )
-                return await self._send_response(target, embed=embed)
+            return await self._send_response(target, content="❌ Esa mascota o comida no existe.")
 
-            return await self._send_response(target, content="❌ Esa mascota o rol no existe.")
-
-    @commands.hybrid_command(name="shop", aliases=["buy"], description="Ve y compra mascotas o roles")
+    @commands.hybrid_command(name="shop", aliases=["buy"], description="Ve y compra mascotas o comida")
     @app_commands.describe(
         action="Elige 'view' para ver la tienda o 'buy' para comprar",
-        pet_name="Nombre de la mascota o rol a comprar",
+        pet_name="Nombre de la mascota o comida a comprar",
 )
     async def shop(self, ctx: commands.Context, action: str = "view", pet_name: str = None):
         await self._process_shop(ctx, action, pet_name)

@@ -387,12 +387,11 @@ class BattleRequestView(discord.ui.View):
 
 
 class ShopView(discord.ui.View):
-    def __init__(self, ctx, pet_shop, role_shop):
+    def __init__(self, ctx, pet_shop):
         super().__init__(timeout=60)
         self.ctx = ctx
         self.pet_shop = pet_shop
-        self.role_shop = role_shop
-        self.page = "pets"  # "pets", "roles" o "food"
+        self.page = "pets"  # "pets" o "food"
         self.pet_subpage = 0
         self.pets_per_page = 15
         self.message: discord.Message | None = None
@@ -448,23 +447,6 @@ class ShopView(discord.ui.View):
                 name = "🐾 Mascotas" if i == 0 else "\u200b"
                 embed.add_field(name=name, value=field_content, inline=False)
 
-        elif self.page == "roles":
-            embed = discord.Embed(
-                title="💎 Tienda de Roles",
-                description=f"✨ ¡Compra roles para ingresos pasivos!\n✨ Tu Descuento de Prestigio: **{discount*100}%**",
-                color=0xF1C40F
-            )
-            
-            role_text = ""
-            for key, data_shop in self.role_shop.items():
-                role = guild.get_role(int(data_shop["role_id"]))
-                role_name = role.name if role else key.capitalize()
-                price = int(data_shop['price'] * (1 - discount))
-                role_text += f"**{role_name}**\n🪙 {price:,} | 💰 {data_shop['claim']:,}/h\n\n"
-            
-            if role_text:
-                embed.add_field(name="💎 Roles", value=role_text, inline=False)
-
         elif self.page == "food":
             embed = discord.Embed(
                 title="🍖 Tienda de Comida",
@@ -485,11 +467,6 @@ class ShopView(discord.ui.View):
     async def show_pets(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.page = "pets"
         self.pet_subpage = 0
-        await interaction.response.edit_message(embed=self._build_embed(interaction.guild), view=self)
-
-    @discord.ui.button(label="Roles", style=discord.ButtonStyle.primary, row=0)
-    async def show_roles(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.page = "roles"
         await interaction.response.edit_message(embed=self._build_embed(interaction.guild), view=self)
 
     @discord.ui.button(label="Comida", style=discord.ButtonStyle.primary, row=0)

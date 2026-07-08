@@ -7,7 +7,7 @@ from discord.ext import commands
 
 from utils.helpers import is_admin, parse_duration, load_warns, save_warns
 from database import eco_col, pets_col
-from config import ROLE_SHOP, STOCKS
+from config import STOCKS
 from utils.stocks import stocks_col, user_stocks_col, stock_alerts_col, ipo_col
 from utils.bounties import bounties_col
 
@@ -335,25 +335,6 @@ class AdminCog(commands.Cog):
         # 4. Limpiar recompensas
         bounties_col.delete_many({})
 
-        # 5. Quitar roles de tienda a todos los miembros del servidor
-        role_ids = [data["role_id"] for data in ROLE_SHOP.values() if "role_id" in data]
-        roles_to_remove = []
-        for rid in role_ids:
-            role = ctx.guild.get_role(rid)
-            if role:
-                roles_to_remove.append(role)
-
-        removed_count = 0
-        if roles_to_remove:
-            for member in ctx.guild.members:
-                member_roles_to_remove = [r for r in roles_to_remove if r in member.roles]
-                if member_roles_to_remove:
-                    try:
-                        await member.remove_roles(*member_roles_to_remove, reason="Reinicio de Economía")
-                        removed_count += 1
-                    except Exception:
-                        pass
-
         embed = discord.Embed(
             title="🧨 Reinicio de Economía Completo",
             description=(
@@ -365,114 +346,9 @@ class AdminCog(commands.Cog):
                 "✅ Todo el historial de precios de acciones limpiado\n"
                 "✅ Todas las alertas de precios eliminadas\n"
                 "✅ Todas las empresas de IPO deslistadas\n"
-                "✅ Todas las recompensas borradas\n"
-                f"✅ Roles de tienda eliminados de **{removed_count}** miembros"
+                "✅ Todas las recompensas borradas"
             ),
             color=0xFF0000,
-            timestamp=datetime.now(timezone.utc)
-        )
-        await ctx.send(embed=embed)
-
-
-    @commands.hybrid_command(name="setuproles", description="Crea todos los roles de la tienda en este servidor y actualiza sus IDs (solo Admin)")
-    @app_commands.default_permissions(administrator=True)
-    async def setuproles(self, ctx: commands.Context):
-        if not is_admin(ctx):
-            return await ctx.send("❌ Comando solo para admins.", ephemeral=True)
-
-        await ctx.defer()
-
-        # Definiciones de roles: la clave coincide con ROLE_SHOP, nombre visible, color
-        ROLE_DEFS = [
-            ("bronze",   "Bronze",   discord.Color.from_rgb(205, 127, 50)),
-            ("silver",   "Silver",   discord.Color.from_rgb(192, 192, 192)),
-            ("gold",     "Gold",     discord.Color.from_rgb(255, 215, 0)),
-            ("diamond",  "Diamond",  discord.Color.from_rgb(185, 242, 255)),
-            ("emerald",  "Emerald",  discord.Color.from_rgb(80, 200, 120)),
-            ("mythic",   "Mythic",   discord.Color.from_rgb(155, 89, 182)),
-            ("cosmic",   "Cosmic",   discord.Color.from_rgb(26, 26, 255)),
-            ("eternal",  "Eternal",  discord.Color.from_rgb(255, 107, 53)),
-            ("secret",   "Secret",   discord.Color.from_rgb(255, 20, 147)),
-            ("godlike",  "Godlike",  discord.Color.from_rgb(255, 50, 50)),
-            ("celestial","Celestial",discord.Color.from_rgb(230, 230, 255)),
-            ("ascended", "Ascended", discord.Color.from_rgb(255, 255, 0)),
-        ]
-
-        created = []
-        skipped = []
-        errors = []
-
-        # Mapear nombres de roles existentes para deduplicación
-        existing_roles = {r.name.lower(): r for r in ctx.guild.roles}
-
-        new_ids: dict[str, int] = {}
-
-        for key, display_name, color in ROLE_DEFS:
-            if display_name.lower() in existing_roles:
-                role = existing_roles[display_name.lower()]
-                new_ids[key] = role.id
-                skipped.append(f"**{display_name}** — ya existe → `{role.id}`")
-            else:
-                try:
-                    role = await ctx.guild.create_role(
-                        name=display_name,
-                        color=color,
-                        mentionable=False,
-                        reason="comando setuproles"
-                    )
-                    new_ids[key] = role.id
-                    created.append(f"**{display_name}** → `{role.id}`")
-                except Exception as e:
-                    errors.append(f"**{display_name}**: {e}")
-
-        # Actualizar ROLE_SHOP en memoria
-        for key, role_id in new_ids.items():
-            if key in ROLE_SHOP:
-                ROLE_SHOP[key]["role_id"] = role_id
-
-        # Parchear config.py en disco para que los IDs sobrevivan reinicios
-        import re, pathlib
-        config_path = pathlib.Path(__file__).parent.parent / "config.py"
-        not_patched: list[str] = []
-        try:
-            text = config_path.read_text()
-            for key, role_id in new_ids.items():
-                # Coincidir con la entrada en cualquier lugar del diccionario (maneja formato multilínea)
-                pattern = rf'("{re.escape(key)}"\s*:\s*\{{[^}}]*?"role_id"\s*:\s*)\d+'
-                new_text, n = re.subn(
-                    pattern,
-                    lambda m, rid=role_id: m.group(1) + str(rid),
-                    text,
-                    flags=re.DOTALL,
-                )
-                if n == 0:
-                    not_patched.append(key)
-                else:
-                    text = new_text
-            config_path.write_text(text)
-            patched = len(not_patched) == 0
-        except Exception as e:
-            patched = False
-            not_patched = list(new_ids.keys())
-            errors.append(f"Error al parchear config.py: {e}")
-
-        lines = []
-        if created:
-            lines.append("✅ **Creados:**\n" + "\n".join(created))
-        if skipped:
-            lines.append("⏭️ **Ya existían:**\n" + "\n".join(skipped))
-        if errors:
-            lines.append("❌ **Errores:**\n" + "\n".join(errors))
-        if patched:
-            lines.append("💾 `config.py` actualizado en disco — los IDs persistirán tras el reinicio.")
-        else:
-            missed = ", ".join(not_patched) if not_patched else "desconocido"
-            lines.append(f"⚠️ Parche de `config.py` incompleto — estas claves NO fueron actualizadas: `{missed}`. Actualízalas manualmente.")
-
-        embed = discord.Embed(
-            title="🛠️ Configuración de Roles de Tienda",
-            description="\n\n".join(lines),
-            color=0x00FF88,
             timestamp=datetime.now(timezone.utc)
         )
         await ctx.send(embed=embed)

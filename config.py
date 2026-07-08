@@ -146,21 +146,6 @@ FOOD_ITEMS = {
     "enchanted": {"price": 500_000, "hunger": 100, "emoji": "🍱", "name": "Comida Encantada"},
 }
 
-ROLE_SHOP = {
-    "bronze":    {"price": 25_000,        "claim": 2_000,       "role_id": 1523427695638085643},
-    "silver":    {"price": 75_000,        "claim": 5_000,       "role_id": 1523427696284270715},
-    "gold":      {"price": 200_000,       "claim": 12_000,      "role_id": 1523427697198497963},
-    "diamond":   {"price": 500_000,       "claim": 30_000,      "role_id": 1523427697966190642},
-    "emerald":   {"price": 1_000_000,     "claim": 75_000,      "role_id": 1523427698452463767},
-    "mythic":    {"price": 3_000_000,     "claim": 200_000,     "role_id": 1523427698981077023},
-    "cosmic":    {"price": 10_000_000,    "claim": 650_000,     "role_id": 1523427699442450675},
-    "eternal":   {"price": 25_000_000,    "claim": 1_500_000,   "role_id": 1523427700079988816},
-    "secret":    {"price": 75_000_000,    "claim": 4_000_000,   "role_id": 1523427700755136712},
-    "godlike":   {"price": 200_000_000,   "claim": 10_000_000,  "role_id": 1523427701363441784},
-    "celestial": {"price": 500_000_000,   "claim": 25_000_000,  "role_id": 1523427702252765377},
-    "ascended":  {"price": 1_000_000_000, "claim": 60_000_000,  "role_id": 1523427702797893764},
-}
-
 PET_RARITIES = {
     "slime": "basic", "rabbit": "basic", "mouse": "basic", "bat": "basic", "spider": "basic",
     "snake": "basic", "frog": "basic", "turtle": "basic", "parrot": "basic", "penguin": "basic",
