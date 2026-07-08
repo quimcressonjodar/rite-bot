@@ -6,12 +6,12 @@ import discord
 from discord.ext import commands, tasks
 
 import state
-from config import WELCOME_CHANNEL_ID, ADVENTURE_LOOT
+from config import WELCOME_CHANNEL_ID, ADVENTURE_LOOT, ANNOUNCEMENTS_CHANNEL_ID
 from database import eco_col
 
 logger = logging.getLogger("weekly-xp-bot")
 
-GLOBAL_DROP_CHANNEL_ID = 1513755454029959239
+GLOBAL_DROP_CHANNEL_ID = ANNOUNCEMENTS_CHANNEL_ID
 GLOBAL_DROP_COIN_REWARDS = [50000, 75000, 100000, 125000, 150000, 200000]
 
 

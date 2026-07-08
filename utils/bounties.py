@@ -135,9 +135,8 @@ async def track_bounty_progress(bot, user_id, bounty_key, increment):
             update_wallet(user_id, bounty["reward"])
 
             # Anunciar en Discord
-            from config import WELCOME_CHANNEL_ID
-            STOCK_NEWS_CHANNEL_ID = 1206197908399980575
-            channel = bot.get_channel(STOCK_NEWS_CHANNEL_ID)
+            from config import ANNOUNCEMENTS_CHANNEL_ID
+            channel = bot.get_channel(ANNOUNCEMENTS_CHANNEL_ID)
             if channel:
                 user = await bot.fetch_user(int(user_id))
                 embed = discord.Embed(

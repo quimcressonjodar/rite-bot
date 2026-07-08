@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 import time
 from utils.bounties import get_active_bounties, spawn_new_bounty
 from database import db
+from config import ANNOUNCEMENTS_CHANNEL_ID
 
 class Bounties(commands.Cog):
     def __init__(self, bot):
@@ -21,8 +22,7 @@ class Bounties(commands.Cog):
         if needed <= 0:
             return
 
-        STOCK_NEWS_CHANNEL_ID = 1206197908399980575
-        channel = self.bot.get_channel(STOCK_NEWS_CHANNEL_ID)
+        channel = self.bot.get_channel(ANNOUNCEMENTS_CHANNEL_ID)
         
         for _ in range(needed):
             new_b = spawn_new_bounty()
